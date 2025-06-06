@@ -18,12 +18,7 @@ services:
       context: ./frontend
     container_name: react-frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    working_dir: /app
-    command: npm run dev
+      - "3000:80"  # nginx serves on port 80 inside container
     depends_on:
       - backend
 

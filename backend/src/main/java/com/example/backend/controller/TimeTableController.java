@@ -1,80 +1,48 @@
 package com.example.backend.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 import com.example.backend.entity.TimeTable;
 import com.example.backend.service.TimeTableService;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/timetable")
 public class TimeTableController {
-	
-	@Autowired
-	TimeTableService timeTableService;
 
-	@GetMapping("/Index")
-	public ModelAndView showIndex() {
-		ModelAndView mav = new ModelAndView("TimeTable");
-		List<TimeTable> TimeTable= timeTableService.showAll();
-		mav.addObject("TimeTable",TimeTable);
-		return mav;
-	}
-	
-	@PostMapping("/AddRecord")
-	public ModelAndView addRecord(@RequestBody TimeTable timetable) {
-		ModelAndView mav = new ModelAndView("TimeTable");
-		timeTableService.addRecord(timetable);
-		return mav;
-	}
+    @Autowired
+    private TimeTableService timeTableService;
 
-	@PostMapping("/DeleteRecord")
-	public ModelAndView deleteRecord(@RequestBody String pk) {
-		ModelAndView mav = new ModelAndView("TimeTable");
-		Gson gson = new Gson();
-		Map<String,Integer> map = gson.fromJson(pk, new TypeToken<Map<String, Integer>>(){}.getType());		
-		TimeTable queryData = timeTableService.getUpdateRecord(map.get("id"));
-		timeTableService.deleteRecord(queryData.getPk().toString());
-		return mav;
-		
-	}
-	
-	@PostMapping("/GetUpdateRecord")
-	@ResponseBody
-	public TimeTable getUpdateRecord(@RequestBody String pk) {
-		Gson gson = new Gson();
-		Map<String,Integer> map = gson.fromJson(pk, new TypeToken<Map<String, Integer>>(){}.getType());		
-		TimeTable queryData = timeTableService.getUpdateRecord(map.get("id"));
-        return queryData;
-	}
-	
-	
-	@PostMapping("/UpdateRecord")
-	public ModelAndView updateRecord(@RequestBody TimeTable timetable) {
-		ModelAndView mav = new ModelAndView("TimeTable");
-		timeTableService.updateRecord(timetable);
-		return mav;
-	}
-	
-	@GetMapping("getAllRecords")
-    @ResponseBody
-    public Map<Integer, TimeTable> getAllRecords() {
-        Map<Integer, TimeTable> data = new HashMap<>();
-        List<TimeTable> TimeTable = timeTableService.showAll();
-        for(TimeTable t: TimeTable) {
-					data.put(t.getPk(), t);
-        }
-        return data;
+    // 取得所有資料
+    @GetMapping
+    public List<TimeTable> getAll() {
+        return timeTableService.showAll();
     }
-	
+
+    // 取得單筆資料
+    @GetMapping("/{id}")
+    public TimeTable getOne(@PathVariable Integer id) {
+        return timeTableService.getUpdateRecord(id);
+    }
+
+    // 新增資料
+    @PostMapping
+    public void create(@RequestBody TimeTable timeTable) {
+        timeTableService.addRecord(timeTable);
+    }
+
+    // 修改資料
+    @PutMapping("/{id}")
+    public void update(@PathVariable Integer id, @RequestBody TimeTable timeTable) {
+        timeTable.setPk(id);
+        timeTableService.updateRecord(timeTable);
+    }
+
+    // 刪除資料
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id) {
+        timeTableService.deleteRecord(id.toString());
+    }
 }
